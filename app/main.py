@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from routes import book
+from app.routes import book
+
 app = FastAPI(
     title='Book search service',
     version="0.1.0"

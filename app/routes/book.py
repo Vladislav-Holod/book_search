@@ -1,9 +1,8 @@
 from fastapi import APIRouter
 
-from serveces.schemas import (BookPrompt,
-                              Book,
-                              RecommendResponse)
-from serveces.recomend_book import recommend_book
+from app.schemas import (BookPrompt,
+                         RecommendResponse)
+from app.serveces.recomend_book import recommend_book
 
 router = APIRouter(
     prefix='/books',

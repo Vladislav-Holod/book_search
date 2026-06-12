@@ -1,3 +1,5 @@
+from app.serveces.external_api import gemini_response
+
 async def search_books(query: list[str],
                        prompt: str) -> list[dict]:
     books_result = []
@@ -12,8 +14,12 @@ async def search_books(query: list[str],
 
 
 async def recommend_book(prompt: str) -> dict:
-    book = ['Harry Potter']
+    """
+    Функция для запроса в gemeni для определния тематики далее ищет через
+    OpenLibrary книги и отдает словарь по pydantic модели
+    """
+    topic = await gemini_response(prompt)
+    return topic
 
-    result = await search_books(book, prompt)
-    return {'prompt': prompt,
-            'books': result}
+
+
