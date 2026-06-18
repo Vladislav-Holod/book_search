@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.schemas import (BookPrompt,
-                         RecommendResponse)
-from app.serveces.recomend_book import recommend_book
+from app.schemas.schemas import (BookPrompt,
+                                 RecommendResponse)
+from app.services.recomend_book import recommend_book
 
 router = APIRouter(
     prefix='/books',

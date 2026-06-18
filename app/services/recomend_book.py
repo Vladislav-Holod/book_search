@@ -1,6 +1,6 @@
 from typing import Any, Coroutine
 
-from app.serveces.external_api import gemini_response
+from app.services.external_api import gemini_response
 import requests
 from fastapi import HTTPException, status
 

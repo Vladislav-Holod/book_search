@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.schemas import UserCreate, User, RefreshTokenRequest
+from app.schemas.schemas import UserCreate, User, RefreshTokenRequest
 from db_depends import get_async_db
 from app.models import UserModel
 from auth import (hash_password,
