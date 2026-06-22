@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select,update
 
@@ -19,8 +19,8 @@ async def get_my_profile(db: AsyncSession = Depends(get_async_db),
     stmt_profile = await db.scalar(select(UserProfileModel).
                                    where(UserProfileModel.user_id == current_user.id))
 
-    if stmt_profile is None or stmt_profile.name is None:
-        raise HTTPException(status_code=400, detail='Profile is not put')
+    if stmt_profile is None:
+        raise HTTPException(status_code=400, detail='Profile is not found')
     return stmt_profile
 
 

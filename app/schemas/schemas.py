@@ -45,7 +45,7 @@ class RefreshTokenRequest(BaseModel):
 
 class UserProfile(BaseModel):
     id: int = Field(description='Уникальный идентификатор пользователя')
-    name: str = Field(max_length=80)
+    name: str | None = Field(default=None, max_length=80)
     favorite_genres: str | None = Field(description='Любимые жанры')
     about_me: str | None = Field(max_length=300, description='Дополнительная информация о пользователе')
     user_id: int = Field(description='Кому принадлежит профиль')
@@ -54,6 +54,6 @@ class UserProfile(BaseModel):
 
 
 class UserUpdateProfile(BaseModel):
-    name: str = Field(max_length=80)
-    favorite_genres: str | None = Field(max_length=200, description='Любимые жанры')
-    about_me: str | None = Field(max_length=300, description='Дополнительная информация о пользователе')
+    name: str | None = Field(default=None, max_length=80)
+    favorite_genres: str | None = Field(default=None, max_length=200, description='Любимые жанры')
+    about_me: str | None = Field(default=None, max_length=300, description='Дополнительная информация о пользователе')
