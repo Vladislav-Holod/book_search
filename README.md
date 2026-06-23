@@ -1,4 +1,4 @@
-# 🎬 Movie Advisor API
+# Movie Advisor API
 
 A REST API for AI-powered movie recommendations built with FastAPI and Gemini.
 
@@ -8,14 +8,14 @@ The service accepts a user's preferences, mood, genres, or a free-form descripti
 
 ## Features
 
-- 🎥 AI-powered movie recommendations using Gemini
-- 📝 Free-text prompt support
-- ✅ Request validation with Pydantic
-- 🏗 Modular project structure
-- ⚡ Async request handling
-- 📖 Interactive API documentation
-- 🔐 JWT authentication (in development)
-- 🗄 Database support with SQLAlchemy and Alembic
+- AI-powered movie recommendations using Gemini
+- Free-text prompt support
+- Request validation with Pydantic
+- Modular project structure
+- Async request handling
+- Interactive API documentation
+- JWT authentication (in development)
+- Database support with SQLAlchemy and Alembic
 
 ---
 
