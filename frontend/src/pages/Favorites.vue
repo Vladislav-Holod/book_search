@@ -12,7 +12,7 @@ onMounted(() => {
 
 <template>
   <div class="favorites-container">
-    <h1>❤️ Избранные фильмы</h1>
+    <h1>Ваши  Избранные фильмы</h1>
     <p class="subtitle">Фильмы, которые вы добавили через рекомендации</p>
 
     <div v-if="movieStore.isLoading" class="loading">Загрузка...</div>

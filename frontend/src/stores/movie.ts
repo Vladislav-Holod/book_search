@@ -8,83 +8,39 @@ import type {
   UserUpdateProfile,
 } from "../types";
 
-/**
- * DEMO фильмы (локальный каталог)
- * Используются только если нет данных с backend
- */
-export const DEMO_MOVIES: Movie[] = [
-  {
-    id: 1,
-    name_movie: "Interstellar",
-    year: 2014,
-    genres: ["Фантастика", "Драма"],
-    description:
-      "Группа исследователей отправляется через червоточину в поисках нового дома для человечества.",
-    poster_image:
-      "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/daf5de47-6c50-4d78-a4e1-f2d7028af7c8/300x450",
-    movieLength: 169,
-    rating: 8.6,
-  },
-  {
-    id: 2,
-    name_movie: "Начало",
-    year: 2010,
-    genres: ["Фантастика", "Триллер"],
-    description:
-      "Профессиональный вор проникает в сны людей, чтобы украсть или внедрить идею.",
-    poster_image:
-      "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/daf5de47-6c50-4d78-a4e1-f2d7028af7c8/300x450",
-    movieLength: 148,
-    rating: 8.7,
-  },
-  {
-    id: 3,
-    name_movie: "Матрица",
-    year: 1999,
-    genres: ["Фантастика", "Боевик"],
-    description:
-      "Хакер узнаёт, что реальность — симуляция, и присоединяется к восстанию против машин.",
-    poster_image:
-      "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/daf5de47-6c50-4d78-a4e1-f2d7028af7c8/300x450",
-    movieLength: 136,
-    rating: 8.5,
-  },
-  {
-    id: 4,
-    name_movie: "Бегущий по лезвию 2049",
-    year: 2017,
-    genres: ["Фантастика", "Детектив"],
-    description:
-      "Офицер полиции Лос-Анджелеса раскрывает давно похороненную тайну.",
-    poster_image:
-      "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/daf5de47-6c50-4d78-a4e1-f2d7028af7c8/300x450",
-    movieLength: 164,
-    rating: 8.0,
-  },
-];
-
 export const useMovieStore = defineStore("movie", () => {
-  const movies = ref<Movie[]>([]);
+  const movies = ref<Movie[]>([]); // ✅ Реальные фильмы из БД
   const likedMovies = ref<Movie[]>([]);
   const recommendations = ref<RecommendResponse | null>(null);
   const isLoading = ref(false);
+  const isFetchingMovies = ref(false); // ✅ Отдельный флаг загрузки фильмов
   const error = ref("");
 
-  /**
-   * Каталог = лайкнутые + демо (без дублей)
-   */
+  // ✅ Каталог теперь показывает фильмы из БД
   const catalogMovies = computed(() => {
-    const liked = likedMovies.value.filter((m) => m.id != null);
-    const seen = new Set(liked.map((m) => m.id));
-
-    const demos = DEMO_MOVIES.filter((m) => !seen.has(m.id));
-
-    return [...liked, ...demos];
+    return movies.value;
   });
 
-  /**
-   * Получить AI-рекомендации
-   */
+  // ✅ Загрузка фильмов из базы данных
+  const fetchMovies = async () => {
+    isFetchingMovies.value = true;
+    error.value = "";
+
+    try {
+      const res = await api.get<Movie[]>("/movie");
+      movies.value = res.data;
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } }).response?.data
+          ?.detail;
+
+      error.value = detail || "Ошибка при загрузке фильмов";
+      movies.value = [];
+    } finally {
+      isFetchingMovies.value = false;
+    }
+  };
+
   const getRecommendations = async (prompt: string) => {
     isLoading.value = true;
     error.value = "";
@@ -108,13 +64,10 @@ export const useMovieStore = defineStore("movie", () => {
     }
   };
 
-  /**
-   * Лайк фильма
-   */
   const likeMovie = async (movieId: number) => {
     try {
-      const res = await api.post<Movie>(`/actions/like/${movieId}`);
-      return res.data;
+      await api.post(`/actions/like/${movieId}`);
+      await getLikedMovies();
     } catch (err: unknown) {
       const detail =
         (err as { response?: { data?: { detail?: string } } }).response?.data
@@ -125,9 +78,23 @@ export const useMovieStore = defineStore("movie", () => {
     }
   };
 
-  /**
-   * Получить избранные фильмы
-   */
+  const unlikeMovie = async (movieId: number) => {
+    try {
+      await api.delete(`/actions/like/${movieId}`);
+
+      likedMovies.value = likedMovies.value.filter(
+        (movie) => movie.id !== movieId
+      );
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } }).response?.data
+          ?.detail;
+
+      error.value = detail || "Ошибка при удалении из избранного";
+      throw err;
+    }
+  };
+
   const getLikedMovies = async () => {
     try {
       const res = await api.get<Movie[]>("/actions/like/my");
@@ -137,17 +104,11 @@ export const useMovieStore = defineStore("movie", () => {
     }
   };
 
-  /**
-   * Проверка лайка
-   */
   const isLiked = computed(() => {
     return (movieId: number) =>
       likedMovies.value.some((m) => m.id === movieId);
   });
 
-  /**
-   * Очистка рекомендаций
-   */
   const clearRecommendations = () => {
     recommendations.value = null;
     error.value = "";
@@ -158,19 +119,19 @@ export const useMovieStore = defineStore("movie", () => {
     likedMovies,
     recommendations,
     isLoading,
+    isFetchingMovies, // ✅ Экспортируем новый флаг
     error,
     catalogMovies,
+    fetchMovies, // ✅ Экспортируем метод загрузки
     getRecommendations,
     likeMovie,
+    unlikeMovie,
     getLikedMovies,
     isLiked,
     clearRecommendations,
   };
 });
 
-/**
- * PROFILE STORE
- */
 export const useProfileStore = defineStore("profile", () => {
   const profile = ref<UserProfile | null>(null);
   const isLoading = ref(false);

@@ -31,7 +31,7 @@ const isActive = (path: string) => route.path === path;
           :class="{ active: isActive('/recommend') }"
           class="nav-link"
         >
-          🤖 Рекомендации
+          Рекомендации
         </router-link>
 
         <router-link
@@ -40,7 +40,7 @@ const isActive = (path: string) => route.path === path;
           :class="{ active: isActive('/favorites') }"
           class="nav-link"
         >
-          ❤️ Избранное
+          Избранное
         </router-link>
 
         <router-link
@@ -49,7 +49,7 @@ const isActive = (path: string) => route.path === path;
           :class="{ active: isActive('/profile') }"
           class="nav-link"
         >
-          👤 Кабинет
+          Кабинет
         </router-link>
 
         <button

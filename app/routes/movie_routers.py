@@ -12,6 +12,7 @@ router = APIRouter(
     tags=['movies']
 )
 
+
 @router.post('/recommend', response_model=RecommendResponse)
 async def get_book_recommend(prompt: MoviePrompt):
     try:
@@ -20,9 +21,15 @@ async def get_book_recommend(prompt: MoviePrompt):
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=e)
 
 
+@router.get('/', response_model=list[Movie])
+async def get_movie(db: AsyncSession = Depends(get_async_db)):
+    movie_list = (await db.scalars(select(MovieModel))).all()
+    return movie_list
+
+
 @router.post('/create', status_code=status.HTTP_201_CREATED)
 async def create_new_movie(movie: Movie,
-                          db: AsyncSession = Depends(get_async_db)):
+                           db: AsyncSession = Depends(get_async_db)):
     movie_result = await db.scalar(select(MovieModel).where(MovieModel.name_movie == movie.name_movie))
     if movie_result is not None:
         raise HTTPException(status_code=404, detail='The movie was created a long time ago')

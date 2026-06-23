@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.schemas.schemas import  Movie
+from app.schemas.schemas import Movie
 from db_depends import get_async_db
 from app.models import UserProfileModel, MovieModel
 from auth import (get_current_user)
@@ -40,14 +40,34 @@ async def user_like_book(movie_id: int,
 
 
 @router.get('/like/my', response_model=list[Movie])
-async def get_liked_books(db: AsyncSession = Depends(get_async_db),
+async def get_liked_movie(db: AsyncSession = Depends(get_async_db),
                           current_user=Depends(get_current_user)):
     profile_user = await db.scalar(select(UserProfileModel).
     options(selectinload(UserProfileModel.liked_movie)).where(
         UserProfileModel.user_id == current_user.id
     ))
     if profile_user is None:
-        raise HTTPException(status_code=404, detail='likes not found')
+        raise HTTPException(status_code=404, detail='profile not found')
 
     return profile_user.liked_movie or []
 
+
+@router.delete('/like/{movie_id}', response_model=dict, status_code=status.HTTP_200_OK)
+async def unlike_movie(movie_id: int,
+                       db: AsyncSession = Depends(get_async_db),
+                       current_user=Depends(get_current_user)):
+    profile_user = await db.scalar(select(UserProfileModel).
+    options(selectinload(UserProfileModel.liked_movie)).where(
+        UserProfileModel.user_id == current_user.id
+    ))
+    if profile_user is None:
+        raise HTTPException(status_code=404, detail='likes not found')
+    movie = await db.scalar(select(MovieModel).where(MovieModel.id == movie_id))
+    if movie is None:
+        raise HTTPException(status_code=404, detail='movie is None')
+    if movie not in profile_user.liked_movie:
+        raise HTTPException(status_code=400, detail='Movie not in liked')
+
+    profile_user.liked_movie.remove(movie)
+    await db.commit()
+    return {'delete': 'ok'}
