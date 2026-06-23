@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useProfileStore } from "../stores/book";
+import { useProfileStore } from "../stores/movie";
+import { useMovieStore } from "../stores/movie";
 
 const profileStore = useProfileStore();
+const movieStore = useMovieStore();
 const isEditing = ref(false);
 const editData = ref({
   name: "",
@@ -10,8 +12,9 @@ const editData = ref({
   about_me: "",
 });
 
-onMounted(() => {
-  profileStore.getProfile();
+onMounted(async () => {
+  await profileStore.getProfile();
+  await movieStore.getLikedMovies();
 });
 
 const startEdit = () => {
@@ -27,19 +30,14 @@ const startEdit = () => {
 
 const cancelEdit = () => {
   isEditing.value = false;
-  editData.value = {
-    name: "",
-    favorite_genres: "",
-    about_me: "",
-  };
 };
 
 const saveEdit = async () => {
   try {
     await profileStore.updateProfile(editData.value);
     isEditing.value = false;
-  } catch (err) {
-    console.error(err);
+  } catch {
+    // ошибка отображается в profileStore.error
   }
 };
 </script>
@@ -47,31 +45,42 @@ const saveEdit = async () => {
 <template>
   <div class="profile-container">
     <div class="profile-card">
-      <h1>👤 Мой профиль</h1>
+      <h1>👤 Личный кабинет</h1>
 
       <div v-if="profileStore.isLoading" class="loading">
         Загрузка профиля...
       </div>
 
       <div v-else-if="profileStore.profile && !isEditing" class="profile-view">
+        <div v-if="!profileStore.hasName" class="name-warning">
+          ⚠️ Укажите имя в профиле — без него нельзя добавлять фильмы в избранное
+        </div>
+
         <div class="profile-field">
-          <label>Имя:</label>
+          <label>Имя</label>
           <p>{{ profileStore.profile.name || "Не указано" }}</p>
         </div>
 
         <div class="profile-field">
-          <label>Любимые жанры:</label>
+          <label>Любимые жанры</label>
           <p>{{ profileStore.profile.favorite_genres || "Не указаны" }}</p>
         </div>
 
         <div class="profile-field">
-          <label>О себе:</label>
+          <label>О себе</label>
           <p>{{ profileStore.profile.about_me || "Не указано" }}</p>
         </div>
 
         <div class="profile-field">
-          <label>Создан:</label>
-          <p>{{ new Date(profileStore.profile.created_at).toLocaleDateString('ru-RU') }}</p>
+          <label>Дата регистрации</label>
+          <p>{{ new Date(profileStore.profile.created_at).toLocaleDateString("ru-RU") }}</p>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-value">{{ movieStore.likedMovies.length }}</span>
+            <span class="stat-label">Фильмов в избранном</span>
+          </div>
         </div>
 
         <button @click="startEdit" class="btn-edit">Редактировать профиль</button>
@@ -79,14 +88,15 @@ const saveEdit = async () => {
 
       <div v-else-if="isEditing" class="profile-edit">
         <div class="form-group">
-          <label for="name">Имя</label>
+          <label for="name">Имя *</label>
           <input
             id="name"
             v-model="editData.name"
             type="text"
             maxlength="80"
-            placeholder="Ваше имя"
+            placeholder="Как к вам обращаться"
           />
+          <span class="field-hint">Обязательно для добавления фильмов в избранное</span>
         </div>
 
         <div class="form-group">
@@ -96,7 +106,7 @@ const saveEdit = async () => {
             v-model="editData.favorite_genres"
             type="text"
             maxlength="200"
-            placeholder="Например: Фантастика, Детектив"
+            placeholder="Например: Sci-Fi, Триллер, Комедия"
           />
         </div>
 
@@ -107,7 +117,7 @@ const saveEdit = async () => {
             v-model="editData.about_me"
             maxlength="300"
             rows="4"
-            placeholder="Расскажите о себе"
+            placeholder="Расскажите о своих кинопредпочтениях"
           ></textarea>
         </div>
 
@@ -150,89 +160,115 @@ const saveEdit = async () => {
   text-align: center;
   color: #a0aec0;
   padding: 3rem 2rem;
-  font-size: 1.1rem;
+}
+
+.name-warning {
+  background: #fefcbf;
+  color: #744210;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #ecc94b;
+  font-size: 0.95rem;
 }
 
 .profile-view {
   display: flex;
   flex-direction: column;
-  gap: 1.8rem;
-}
-
-.profile-field {
-  display: flex;
-  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .profile-field label {
   font-weight: 700;
   color: #2d3748;
-  margin-bottom: 0.6rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: block;
 }
 
 .profile-field p {
   color: #4a5568;
   padding: 1rem;
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  background: #f7fafc;
   border-radius: 8px;
   border-left: 3px solid #667eea;
-  font-weight: 500;
-  line-height: 1.6;
+  margin: 0;
+}
+
+.stats-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-box {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
 .profile-edit {
   display: flex;
   flex-direction: column;
-  gap: 1.8rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group label {
   font-weight: 700;
   color: #2d3748;
-  margin-bottom: 0.6rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
 .form-group input,
 .form-group textarea {
+  width: 100%;
   padding: 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 1rem;
   font-family: inherit;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: white;
+  transition: border-color 0.3s;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  transform: translateY(-2px);
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  margin-top: 0.35rem;
+  display: block;
 }
 
 .error-message {
-  background: linear-gradient(135deg, #fed7d7 0%, #fbb6ce 100%);
+  background: #fed7d7;
   color: #742a2a;
-  padding: 1rem 1.5rem;
+  padding: 1rem;
   border-radius: 8px;
-  border-left: 4px solid #fc8181;
-  font-weight: 500;
 }
 
 .button-group {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
 }
 
 .btn-edit,
@@ -244,7 +280,7 @@ const saveEdit = async () => {
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
 
 .btn-edit,
@@ -252,13 +288,6 @@ const saveEdit = async () => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   flex: 1;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-}
-
-.btn-edit:hover,
-.btn-save:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
 }
 
 .btn-cancel {
@@ -268,11 +297,6 @@ const saveEdit = async () => {
   flex: 1;
 }
 
-.btn-cancel:hover {
-  background: #edf2f7;
-  border-color: #667eea;
-}
-
 @media (max-width: 768px) {
   .profile-container {
     padding: 1rem;
@@ -280,10 +304,6 @@ const saveEdit = async () => {
 
   .profile-card {
     padding: 1.5rem;
-  }
-
-  .profile-card h1 {
-    font-size: 1.5rem;
   }
 
   .button-group {

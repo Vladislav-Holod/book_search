@@ -4,20 +4,35 @@ export interface User {
   is_active: boolean;
 }
 
-export interface Book {
+export interface Movie {
   id?: number;
+  id_pois?: number | null;
+  name_movie: string;
+  year?: number | null;
+  genres: string[];
+  description: string;
+  poster_image: string;
+  movieLength?: number | null;
+  rating: number;
+}
+
+export interface RecommendResponse {
+  prompt: string;
   title: string;
-  author?: string;
-  image_url?: string;
-  description?: string;
-  genres?: string;
+  movies: Movie[];
 }
 
 export interface UserProfile {
   id: number;
-  name: string;
-  favorite_genres?: string;
-  about_me?: string;
+  name: string | null;
+  favorite_genres: string | null;
+  about_me: string | null;
   user_id: number;
   created_at: string;
+}
+
+export interface UserUpdateProfile {
+  name?: string | null;
+  favorite_genres?: string | null;
+  about_me?: string | null;
 }

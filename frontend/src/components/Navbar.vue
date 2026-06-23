@@ -11,34 +11,19 @@ const handleLogout = () => {
   router.push("/auth");
 };
 
-const isActive = (path: string) => {
-  return route.path === path;
-};
+const isActive = (path: string) => route.path === path;
 </script>
 
 <template>
   <nav class="navbar">
     <div class="nav-container">
       <router-link to="/" class="nav-logo">
-        📚 BookSearch
+        🎬 MovieSearch
       </router-link>
 
       <div class="nav-links">
-        <router-link
-          to="/"
-          :class="{ active: isActive('/') }"
-          class="nav-link"
-        >
+        <router-link to="/" :class="{ active: isActive('/') }" class="nav-link">
           Главная
-        </router-link>
-
-        <router-link
-          v-if="auth.isAuthenticated()"
-          to="/favorites"
-          :class="{ active: isActive('/favorites') }"
-          class="nav-link"
-        >
-          ❤️ Избранное
         </router-link>
 
         <router-link
@@ -51,11 +36,20 @@ const isActive = (path: string) => {
 
         <router-link
           v-if="auth.isAuthenticated()"
+          to="/favorites"
+          :class="{ active: isActive('/favorites') }"
+          class="nav-link"
+        >
+          ❤️ Избранное
+        </router-link>
+
+        <router-link
+          v-if="auth.isAuthenticated()"
           to="/profile"
           :class="{ active: isActive('/profile') }"
           class="nav-link"
         >
-          👤 Профиль
+          👤 Кабинет
         </router-link>
 
         <button
@@ -72,7 +66,7 @@ const isActive = (path: string) => {
           :class="{ active: isActive('/auth') }"
           class="nav-link btn-auth"
         >
-          Вход / Регистрация
+          Вход
         </router-link>
       </div>
     </div>
@@ -100,25 +94,23 @@ const isActive = (path: string) => {
 }
 
 .nav-logo {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-decoration: none;
-  transition: transform 0.3s, filter 0.3s;
-  letter-spacing: -0.5px;
+  transition: transform 0.3s;
 }
 
 .nav-logo:hover {
   transform: scale(1.05);
-  filter: brightness(1.2);
 }
 
 .nav-links {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -128,7 +120,7 @@ const isActive = (path: string) => {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.3s;
   background: none;
   border: none;
   cursor: pointer;
@@ -144,21 +136,15 @@ const isActive = (path: string) => {
   width: 0;
   height: 2px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transition: width 0.3s ease;
+  transition: width 0.3s;
 }
 
-.nav-link:hover {
-  color: #667eea;
-}
-
-.nav-link:hover::after {
-  width: 100%;
-}
-
+.nav-link:hover,
 .nav-link.active {
   color: #667eea;
 }
 
+.nav-link:hover::after,
 .nav-link.active::after {
   width: 100%;
 }
@@ -168,16 +154,7 @@ const isActive = (path: string) => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: white !important;
   border-radius: 6px !important;
-  border: none !important;
-  font-weight: 600 !important;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  transition: all 0.3s;
-}
-
-.btn-auth:hover {
-  opacity: 1 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-auth::after {
@@ -185,18 +162,10 @@ const isActive = (path: string) => {
 }
 
 .logout {
-  padding: 0.6rem 1.4rem !important;
+  padding: 0.6rem 1.2rem !important;
   background: #fee8ec !important;
   color: #c33 !important;
   border-radius: 6px !important;
-  font-weight: 600 !important;
-  transition: all 0.3s;
-}
-
-.logout:hover {
-  background: #fdd4da !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(204, 51, 51, 0.2);
 }
 
 .logout::after {
@@ -205,23 +174,14 @@ const isActive = (path: string) => {
 
 @media (max-width: 768px) {
   .nav-container {
-    flex-direction: row;
-    gap: 1rem;
     padding: 1rem;
   }
 
   .nav-links {
-    gap: 0.8rem;
+    gap: 0.75rem;
   }
 
   .nav-link {
-    font-size: 0.85rem;
-    padding: 0.3rem 0;
-  }
-
-  .btn-auth,
-  .logout {
-    padding: 0.5rem 1rem !important;
     font-size: 0.85rem;
   }
 }

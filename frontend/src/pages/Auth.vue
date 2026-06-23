@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
-import { useProfileStore } from "../stores/book";
+import { useProfileStore } from "../stores/movie";
 
 const email = ref("");
 const password = ref("");
@@ -27,7 +27,7 @@ const handleSubmit = async () => {
       // После регистрации автоматически логинимся
       await auth.login(email.value, password.value);
     }
-    router.push("/");
+    router.push("/profile");
   } catch (err) {
     console.error(err);
   }

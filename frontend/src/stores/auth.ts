@@ -1,12 +1,8 @@
 import { defineStore } from "pinia";
 import { api } from "../api/axios";
 import { ref } from "vue";
-
-interface User {
-  id: number;
-  email: string;
-  is_active: boolean;
-}
+import type { User } from "../types";
+import { useProfileStore } from "./movie";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null);
@@ -19,14 +15,11 @@ export const useAuthStore = defineStore("auth", () => {
 
   const initProfile = async () => {
     if (isAuthenticated()) {
-      // Пытаемся загрузить профиль при инициализации
       try {
-        const { useProfileStore } = await import('./book');
         const profileStore = useProfileStore();
         await profileStore.getProfile();
-      } catch (err) {
-        // Пропускаем ошибку, профиль загрузится позже
-        console.log('Profile init skipped');
+      } catch {
+        // профиль загрузится при переходе на страницу
       }
     }
   };
@@ -35,10 +28,12 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading.value = true;
     error.value = "";
     try {
-      const res = await api.post("/users/", { email, password });
+      const res = await api.post<User>("/user/", { email, password });
       return res.data;
-    } catch (err: any) {
-      error.value = err.response?.data?.detail || "Ошибка регистрации";
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+      error.value = detail || "Ошибка регистрации";
       throw err;
     } finally {
       isLoading.value = false;
@@ -53,10 +48,8 @@ export const useAuthStore = defineStore("auth", () => {
       form.append("username", email);
       form.append("password", password);
 
-      const res = await api.post("/users/token", form, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+      const res = await api.post("/user/token", form, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
       accessToken.value = res.data.access_token;
@@ -66,8 +59,10 @@ export const useAuthStore = defineStore("auth", () => {
       localStorage.setItem("refresh_token", refreshToken.value);
 
       user.value = { id: 0, email, is_active: true };
-    } catch (err: any) {
-      error.value = err.response?.data?.detail || "Ошибка входа";
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+      error.value = detail || "Ошибка входа";
       throw err;
     } finally {
       isLoading.value = false;
@@ -84,14 +79,16 @@ export const useAuthStore = defineStore("auth", () => {
 
   const refreshAccessToken = async () => {
     try {
-      const res = await api.post("/users/refresh-token", {
+      const res = await api.post("/user/refresh-token", {
         refresh_token: refreshToken.value,
       });
       accessToken.value = res.data.access_token;
+      refreshToken.value = res.data.refresh_token;
       localStorage.setItem("access_token", accessToken.value);
-    } catch (err) {
+      localStorage.setItem("refresh_token", refreshToken.value);
+    } catch {
       logout();
-      throw err;
+      throw new Error("Session expired");
     }
   };
 
