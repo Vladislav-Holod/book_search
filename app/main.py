@@ -6,7 +6,7 @@ from app.routes import (book,
                         users,user_actions)
 
 app = FastAPI(
-    title='Book search service',
+    title='Cinema search service',
     version="0.1.0"
 )
 

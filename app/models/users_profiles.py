@@ -2,7 +2,7 @@ from sqlalchemy import Integer, ForeignKey, DateTime, func, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from database import Base
-from app.models.association_tables import user_profile_liked_books
+from app.models.association_tables import user_profile_liked_movie
 
 class UserProfileModel(Base):
     __tablename__ = "user_profiles"
@@ -24,8 +24,8 @@ class UserProfileModel(Base):
         "UserModel",
         back_populates="profile"
     )
-    liked_books: Mapped[list['BookModel']] = relationship(
-        'BookModel',
-        secondary=user_profile_liked_books,
+    liked_movie: Mapped[list['MovieModel']] = relationship(
+        'MovieModel',
+        secondary=user_profile_liked_movie,
         back_populates='liked_by_profiles'
     )

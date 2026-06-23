@@ -1,11 +1,11 @@
 from .users import UserModel
-from .book import BookModel
+from .movie_models import MovieModel
 from .users_profiles import UserProfileModel
-from .association_tables import user_favorite_books
+from .association_tables import user_profile_liked_movie
 
 __all__ = [
     "UserProfileModel",
-    "BookModel",
+    "MovieModel",
     "UserModel",
-    "user_favorite_books",
+    "user_profile_liked_movie",
 ]
