@@ -9,17 +9,17 @@ class GeminiProvider(LLMProvider):
 
     def __init__(self):
         self.__api_key = config.AI_API_KEY
-        self.client = genai.Client(api_key=self.__api_key)
+        self.__client = genai.Client(api_key=self.__api_key)
 
     async def generate(self, prompt: str, temperature: float = 0.7) -> str:
         try:
-            result = await self.client.aio.models.generate_content(
+            result = await self.__client.aio.models.generate_content(
                 model=config.MODEL_NAME,
                 contents=prompt,
                 config=genai.types.GenerateContentConfig(
                     response_mime_type="application/json")
             )
         except Exception as e:
-            logger.info(f'Ошибка AI - {e}')
+            logger.error(f'Ошибка AI - {e}')
             raise AIProviderError(f'Внутреняя ошибка AI {e}')
         return result.text
