@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, ForeignKey, DateTime, func, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from database import Base
+from app.database import Base
 from app.models.association_tables import user_profile_liked_movie
 
 class UserProfileModel(Base):

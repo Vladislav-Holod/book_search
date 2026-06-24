@@ -5,13 +5,13 @@ from sqlalchemy import select
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.schemas.schemas import UserCreate, User, RefreshTokenRequest
-from db_depends import get_async_db
+from app.db_depends import get_async_db
 from app.models import UserModel, UserProfileModel
-from auth import (hash_password,
-                  verify_password,
-                  create_access_token,
-                  create_refresh_token)
-from auth import SECRET_KEY, ALGORITHM
+from app.auth import (hash_password,
+                      verify_password,
+                      create_access_token,
+                      create_refresh_token)
+from app.auth import SECRET_KEY, ALGORITHM
 
 router = APIRouter(
     prefix='/user',

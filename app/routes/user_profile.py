@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select,update
 
 from app.schemas.schemas import UserProfile, UserUpdateProfile
-from db_depends import get_async_db
+from app.db_depends import get_async_db
 from app.models import UserModel,UserProfileModel
-from auth import (get_current_user)
+from app.auth import (get_current_user)
 
 router = APIRouter(
     prefix='/profile',

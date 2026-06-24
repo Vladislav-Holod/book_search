@@ -2,24 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.schemas.schemas import (MoviePrompt, RecommendResponse, Movie)
-from app.services.recomend_movie import recommend_movie
-from db_depends import get_async_db
+from app.schemas.schemas import (Movie)
+
+from app.db_depends import get_async_db
 from app.models import MovieModel
 
 router = APIRouter(
     prefix='/movie',
     tags=['movies']
 )
-
-
-@router.post('/recommend', response_model=RecommendResponse)
-async def get_book_recommend(prompt: MoviePrompt):
-    try:
-        return await recommend_movie(prompt.prompt)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=e)
-
 
 @router.get('/', response_model=list[Movie])
 async def get_movie(db: AsyncSession = Depends(get_async_db)):

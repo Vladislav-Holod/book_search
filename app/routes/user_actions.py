@@ -4,9 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.schemas.schemas import Movie
-from db_depends import get_async_db
+from app.db_depends import get_async_db
 from app.models import UserProfileModel, MovieModel
-from auth import (get_current_user)
+from app.auth import (get_current_user)
 
 router = APIRouter(
     prefix='/actions',

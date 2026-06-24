@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.config import config
-from db_depends import get_async_db
+from app.db_depends import get_async_db
 from app.models import UserModel
 
 ALGORITHM = config.ALGORITHM

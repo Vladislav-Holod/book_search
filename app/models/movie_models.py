@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, String, JSON, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from database import Base
+from app.database import Base
 from app.models.association_tables import user_profile_liked_movie
 
 
