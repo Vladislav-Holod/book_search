@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from datetime import datetime
 from typing import List
 
+
 class MoviePrompt(BaseModel):
     prompt: str = Field(...,
                         min_length=10,
@@ -15,13 +16,13 @@ class Movie(BaseModel):
     name_movie: str = Field(default="Без имени", description="Название фильма")
     year: int | None = Field(default=None, description="Год выпуска")
     genres: List[str] = Field(default_factory=list, description="Жанры фильма")
-    description: str = Field(default="empty", description="Описание фильма")
-    poster_image: str = Field(
-        default="https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/daf5de47-6c50-4d78-a4e1-f2d7028af7c8/300x450",
+    description: str | None = Field(default="empty", description="Описание фильма")
+    poster_image: str  = Field(
+        default="https://img.magnific.com/premium-vector/black-blank-book-cover-isolated-transparent_168129-46.jpg?semt=ais_hybrid&w=740",
         description="Ссылка на постер фильма"
     )
     movieLength: int | None = Field(default=None, description="Длительность фильма в минутах")
-    rating: float = Field(default=0.0, description="Рейтинг фильма")
+    rating: float | None = Field(default=0.0, description="Рейтинг фильма")
 
     model_config = ConfigDict(from_attributes=True)
 
