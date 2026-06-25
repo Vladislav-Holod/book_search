@@ -47,7 +47,7 @@ class PoiskinoProvider:
             'sortType': filters.get('sortType', '-1'),
             'type': filters.get('type', 'movie'),
             'status': 'completed',
-            'notNullFields': ['name', 'poster.previewUrl', 'description']
+            'notNullFields': 'name'
         }
         if 'genres' in filters:
             params['genres.name'] = filters['genres']

@@ -3,13 +3,14 @@ from typing import Any
 
 from app.services.providers_llm.base import LLMProvider
 from loguru import logger
-from fastapi import HTTPException,status
+from fastapi import HTTPException, status
+
 
 class AIService:
     def __init__(self, provider: LLMProvider):
         self.provider = provider
 
-    async def ai_response(self, text: str) -> Any:
+    async def ai_response_search_filters(self, text: str) -> list:
         prompt = f"""
         Ты помощник для поиска фильмов. Составь 2-3 разных набора фильтров для поиска по запросу пользователя.
 
@@ -55,4 +56,51 @@ class AIService:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail='Ошибка извлечения фильтров'
+            )
+
+    async def ai_search_best_movie(self, all_movies: list, prompt):
+
+        movie_list = [m.model_dump() for m in all_movies]
+
+        prompt = f"""
+        Пользователь ищет фильмы по запросу: "{prompt}"
+
+        Вот список реальных фильмов из базы данных:
+        {json.dumps(movie_list, ensure_ascii=False)}
+
+        Твоя задача — выбрать 5-10 фильмов которые МАКСИМАЛЬНО точно соответствуют именно запросу пользователя.
+
+        Верни ТОЛЬКО JSON без пояснений и markdown.
+
+        Формат:
+        {{
+          "movies": [
+            {{
+              "id": 123,
+              "reason": "почему этот фильм подходит под запрос пользователя (1 предложение на русском)"
+            }}
+          ]
+        }}
+
+        Правила:
+        - выбирай ТОЛЬКО из предоставленного списка, никаких новых фильмов
+        - сортируй по релевантности запросу — самый подходящий первым
+        - в reason объясняй именно почему фильм подходит под конкретный запрос пользователя
+        - если пользователь просил страшные — reason должен говорить почему именно этот фильм страшный
+        - если пользователь просил про приключения — reason про приключения и т.д.
+        - если ни один фильм не подходит под запрос — верни пустой список
+        - не выбирай фильмы только по высокому рейтингу если они не соответствуют запросу
+        """
+        result = await self.provider.generate(prompt)
+        try:
+            data = json.loads(result)
+            selected_ids = {m['id']: m['reason'] for m in data['movies']}
+            final_movies = [m for m in movie_list if m['id_pois'] in selected_ids]
+            return final_movies
+
+        except Exception as e:
+            logger.error(f'Ошибка парсинга выбора фильмов - {e}, raw: {result}')
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail='Ошибка выбора фильмов'
             )
