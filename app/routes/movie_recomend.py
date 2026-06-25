@@ -23,7 +23,7 @@ async def recommend_movie(prompt: str):
         if isinstance(movies, Exception):
             continue
         for movie in movies:
-            if movies.id_pois not in seen:
+            if movie.id_pois not in seen:
                 seen.add(movie.id_pois)
                 all_movies.append(movie)
     result_movie_for_client = await ai_client.ai_search_best_movie(all_movies, prompt)

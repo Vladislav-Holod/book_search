@@ -60,7 +60,17 @@ class AIService:
 
     async def ai_search_best_movie(self, all_movies: list, prompt):
 
-        movie_list = [m.model_dump() for m in all_movies]
+        movie_list = [
+            {
+                'id': m.id_pois,
+                'name': m.name_movie,
+                'year': m.year,
+                'rating': m.rating,
+                'genres': m.genres,
+                'description': (m.description or '')[:200]
+            }
+            for m in all_movies
+        ]
 
         prompt = f"""
         Пользователь ищет фильмы по запросу: "{prompt}"
@@ -95,7 +105,12 @@ class AIService:
         try:
             data = json.loads(result)
             selected_ids = {m['id']: m['reason'] for m in data['movies']}
-            final_movies = [m for m in movie_list if m['id_pois'] in selected_ids]
+            final_movies = []
+            for movie in all_movies:
+                if movie.id_pois in selected_ids:
+                    movie.reason = selected_ids[movie.id_pois]
+                    final_movies.append(movie)
+
             return final_movies
 
         except Exception as e:

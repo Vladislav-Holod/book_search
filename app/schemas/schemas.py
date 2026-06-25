@@ -23,6 +23,7 @@ class Movie(BaseModel):
     )
     movieLength: int | None = Field(default=None, description="Длительность фильма в минутах")
     rating: float | None = Field(default=0.0, description="Рейтинг фильма")
+    reason: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
