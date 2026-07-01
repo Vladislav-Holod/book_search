@@ -43,7 +43,7 @@ async def recommend_movie(prompt: MoviePrompt,
             select(MovieModel.id_pois).where(
                 MovieModel.id_pois.in_(movie_ids)))).scalars().all())
     new_movies = [
-        MovieModel(**movie.model_dump())
+        MovieModel(**movie.model_dump(exclude = {'reason','id'}))
         for movie in result_movie_for_client
         if movie.id_pois not in existing_ids]
 

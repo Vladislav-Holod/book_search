@@ -79,8 +79,12 @@ async def get_history_user(
         current_user=Depends(get_current_user),
         db: AsyncSession = Depends(get_async_db)
 ):
-    result = await db.scalars(select(UserHistoryPrompt).
-                              where(UserHistoryPrompt.user_id == current_user.id))
+    result = await db.scalars(
+        select(UserHistoryPrompt)
+        .options(selectinload(UserHistoryPrompt.movie_recommend))
+        .where(UserHistoryPrompt.user_id == current_user.id)
+    )
+
     history = result.all()
     if history is None:
         raise HTTPException(status_code=400, detail='history error')
@@ -89,7 +93,7 @@ async def get_history_user(
 
 
 @router.get('/history/{history_id}', response_model=UserHistory)
-async def get_history_user(history_id:int,
+async def get_history_user_id(history_id:int,
         current_user=Depends(get_current_user),
         db: AsyncSession = Depends(get_async_db)
 ):
