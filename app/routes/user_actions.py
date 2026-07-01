@@ -5,8 +5,9 @@ from sqlalchemy.orm import selectinload
 
 from app.schemas.schemas import Movie
 from app.db_depends import get_async_db
-from app.models import UserProfileModel, MovieModel
+from app.models import UserProfileModel, MovieModel, UserHistoryPrompt
 from app.auth import (get_current_user)
+from app.schemas.schemas import UserGroupHistory,UserHistory
 
 router = APIRouter(
     prefix='/actions',
@@ -71,3 +72,32 @@ async def unlike_movie(movie_id: int,
     profile_user.liked_movie.remove(movie)
     await db.commit()
     return {'delete': 'ok'}
+
+
+@router.get('/history', response_model=UserGroupHistory)
+async def get_history_user(
+        current_user=Depends(get_current_user),
+        db: AsyncSession = Depends(get_async_db)
+):
+    result = await db.scalars(select(UserHistoryPrompt).
+                              where(UserHistoryPrompt.user_id == current_user.id))
+    history = result.all()
+    if history is None:
+        raise HTTPException(status_code=400, detail='history error')
+
+    return {'history': history}
+
+
+@router.get('/history/{history_id}', response_model=UserHistory)
+async def get_history_user(history_id:int,
+        current_user=Depends(get_current_user),
+        db: AsyncSession = Depends(get_async_db)
+):
+    history_ = await db.scalar(select(UserHistoryPrompt).
+                              where(UserHistoryPrompt.user_id == current_user.id).
+                              where(UserHistoryPrompt.id == history_id))
+
+    if history_ is None:
+        raise HTTPException(status_code=400, detail='history not found')
+
+    return {'history': history_}

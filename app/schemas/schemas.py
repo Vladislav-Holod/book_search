@@ -17,7 +17,7 @@ class Movie(BaseModel):
     year: int | None = Field(default=None, description="Год выпуска")
     genres: List[str] = Field(default_factory=list, description="Жанры фильма")
     description: str | None = Field(default="empty", description="Описание фильма")
-    poster_image: str  = Field(
+    poster_image: str = Field(
         default="https://img.magnific.com/premium-vector/black-blank-book-cover-isolated-transparent_168129-46.jpg?semt=ais_hybrid&w=740",
         description="Ссылка на постер фильма"
     )
@@ -65,5 +65,22 @@ class UserProfile(BaseModel):
 
 class UserUpdateProfile(BaseModel):
     name: str | None = Field(default=None, max_length=80)
-    favorite_genres: str | None = Field(default=None, max_length=200, description='Любимые жанры')
-    about_me: str | None = Field(default=None, max_length=300, description='Дополнительная информация о пользователе')
+    favorite_genres: str | None = Field(default=None, max_length=200,
+                                        description='Любимые жанры')
+    about_me: str | None = Field(default=None, max_length=300,
+                                 description='Дополнительная информация о пользователе')
+
+
+
+class UserHistory(BaseModel):
+    id: int = Field(description='Уникальный идентификатор одной истории')
+    prompt: str = Field(description='Промт')
+    response: str = Field(description='Ответ')
+    user_id: int = Field(description='id пользователя')
+    created_at: datetime = Field(description='Время')
+    movie_list: list[Movie] = Field(
+    validation_alias="movie_recommend")
+
+    model_config = ConfigDict(from_attributes=True)
+class UserGroupHistory(BaseModel):
+    history: list[UserHistory] = Field(description='Список истории')

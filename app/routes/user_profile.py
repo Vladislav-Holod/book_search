@@ -12,7 +12,6 @@ router = APIRouter(
     tags=['user_profile']
 )
 
-
 @router.get('/me', response_model=UserProfile)
 async def get_my_profile(db: AsyncSession = Depends(get_async_db),
                          current_user: UserModel = Depends(get_current_user)):

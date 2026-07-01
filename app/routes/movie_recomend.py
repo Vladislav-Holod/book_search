@@ -5,10 +5,12 @@ from app.dependencies import api_kinopoisk
 import asyncio
 from app.db_depends import get_async_db
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import MovieModel
+from app.models import MovieModel,UserHistoryPrompt
 from sqlalchemy import select
 from app.auth import (get_current_user)
 from app.schemas.schemas import MoviePrompt
+
+
 router = APIRouter(
     prefix='/movie',
     tags=['AI']
@@ -19,7 +21,6 @@ router = APIRouter(
 async def recommend_movie(prompt: MoviePrompt,
                           db: AsyncSession = Depends(get_async_db),
                           current_user=Depends(get_current_user)):
-
     filter_sets = await ai_client.ai_response_search_filters(prompt.prompt)
     tasks = [api_kinopoisk.search_by_filters(f, limit=15) for f in filter_sets]
     results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -46,8 +47,13 @@ async def recommend_movie(prompt: MoviePrompt,
         for movie in result_movie_for_client
         if movie.id_pois not in existing_ids]
 
+    history_response = UserHistoryPrompt(prompt=prompt.prompt,
+                                  response='Response by AI',
+                                  user_id = current_user.id,movie_recommend=[])
+    db.add(history_response)
     if new_movies:
         db.add_all(new_movies)
-        await db.commit()
 
+    history_response.movie_recommend.extend(new_movies)
+    await db.commit()
     return result_movie_for_client
