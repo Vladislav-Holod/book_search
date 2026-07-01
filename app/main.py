@@ -3,14 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
 from uuid import uuid4
-from app.routes import (movie_routers,
-                        user_profile,
-                        user_auth, user_actions,movie_recomend)
+from app.routes import router as api_router
 
 app = FastAPI(
     title='Cinema search service',
     version="0.1.1",redirect_slashes=False
 )
+app.include_router(api_router)
 
 logger.add("info.log", format="Log: [{extra[log_id]}:{time} - {level} - {message}]", level="INFO", enqueue=True)
 
@@ -43,11 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(movie_routers.router)
-app.include_router(user_auth.router)
-app.include_router(user_profile.router)
-app.include_router(user_actions.router)
-app.include_router(movie_recomend.router)
+
 
 @app.get('/')
 async def root():
